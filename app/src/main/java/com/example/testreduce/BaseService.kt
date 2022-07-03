@@ -26,10 +26,13 @@ abstract class BaseService : Service() {
         thread.quitSafely()
     }
 
-    abstract fun classifyURIsByDeviceId()
+
+    abstract fun collectUriListsFormAllDevices(data: Bundle, replyTo: Messenger?)
+
+    abstract fun classifyUrisByDeviceId(data: Bundle, replyTo: Messenger?)
 
 
-    internal class ReduceHandler(context: Context, looper: Looper) : Handler(looper) {
+    inner class ReduceHandler(context: Context, looper: Looper) : Handler(looper) {
         override fun handleMessage(msg: Message) {
             //数据安全检查
             handleMessage(msg)
@@ -37,11 +40,14 @@ abstract class BaseService : Service() {
                 0 -> {
                     if(!msg.data.getStringArrayList("uriMap").isNullOrEmpty()){
                         //分配uri
-                        classifyUrisByDeviceId(msg.data,msg.replyTo)
+                        this@BaseService.classifyUrisByDeviceId(msg.data,msg.replyTo)
                     }
                 }
                 1 -> {
-                     if(!msg.data.getStringArrayList("uriList"))
+                     if(!msg.data.getStringArrayList("uriList").isNullOrEmpty()){
+                         //收集来自所有设备的uriList
+                         this@BaseService.collectUriListsFormAllDevices(msg.data, msg.replyTo)
+                     }
                 }
             }
         }
